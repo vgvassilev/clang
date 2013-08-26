@@ -946,7 +946,7 @@ bool ASTReader::ReadSLocEntry(int ID) {
     // We will detect whether a file changed and return 'Failure' for it, but
     // we will also try to fail gracefully by setting up the SLocEntry.
     unsigned InputID = Record[4];
-    InputFile IF = getInputFile(*F, InputID);
+    InputFile IF = getInputFile(*F, InputID, /*Complain=*/false);
     const FileEntry *File = IF.getFile();
     bool OverriddenBuffer = IF.isOverridden();
 
@@ -1696,7 +1696,8 @@ InputFile ASTReader::getInputFile(ModuleFile &F, unsigned ID, bool Complain) {
       }
       // Record that we didn't find the file.
       F.InputFilesLoaded[ID-1] = InputFile::getNotFound();
-      return InputFile();
+      File = FileMgr.getVirtualFile(Filename, StoredSize, StoredTime);
+      //return InputFile();
     }
 
     // Check if there was a request to override the contents of the file
