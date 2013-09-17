@@ -249,7 +249,9 @@ void ModuleManager::removeModules(
     // safely invalidate it anyway).
     if (LoadedSuccessfully.count(&*victim) == 0 &&
         !PCMCache->tryToRemoveBuffer(victim->FileName))
-      FileMgr.invalidateCache(victim->File);
+      FileMgr.invalidateCache(const_cast<FileEntry*>((*victim)->File));
+
+    delete *victim;
   }
 
   // Delete the modules.
