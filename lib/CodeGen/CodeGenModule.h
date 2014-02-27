@@ -52,6 +52,7 @@ class IndexedInstrProfReader;
 namespace clang {
 class ASTContext;
 class AtomicType;
+class CodeGeneratorImpl; // hack needed by cling
 class FunctionDecl;
 class IdentifierInfo;
 class ObjCMethodDecl;
@@ -1337,6 +1338,7 @@ private:
   void ConstructDefaultFnAttrList(StringRef Name, bool HasOptnone,
                                   bool AttrOnCallSite,
                                   llvm::AttrBuilder &FuncAttrs);
+   friend class clang::CodeGeneratorImpl; // hack needed by cling
 };
 }  // end namespace CodeGen
 }  // end namespace clang
