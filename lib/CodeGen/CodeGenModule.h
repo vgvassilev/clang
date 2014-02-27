@@ -50,6 +50,7 @@ namespace clang {
 class TargetCodeGenInfo;
 class ASTContext;
 class AtomicType;
+class CodeGeneratorImpl; // hack needed by cling
 class FunctionDecl;
 class IdentifierInfo;
 class ObjCMethodDecl;
@@ -1213,6 +1214,8 @@ private:
   /// Check whether we can use a "simpler", more core exceptions personality
   /// function.
   void SimplifyPersonality();
+
+   friend class clang::CodeGeneratorImpl; // hack needed by cling
 };
 }  // end namespace CodeGen
 }  // end namespace clang
