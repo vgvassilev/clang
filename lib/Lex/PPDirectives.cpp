@@ -733,7 +733,11 @@ const FileEntry *Preprocessor::LookupFile(
     const DirectoryLookup *FromDir, const FileEntry *FromFile,
     const DirectoryLookup *&CurDir, SmallVectorImpl<char> *SearchPath,
     SmallVectorImpl<char> *RelativePath,
-    ModuleMap::KnownHeader *SuggestedModule, bool *IsMapped, bool SkipCache) {
+    ModuleMap::KnownHeader *SuggestedModule,
+    bool *IsMapped,
+    bool SkipCache,
+    bool OpenFile,
+    bool CacheFailures) {
   Module *RequestingModule = getModuleForLocation(FilenameLoc);
   bool RequestingModuleIsModuleInterface = !SourceMgr.isInMainFile(FilenameLoc);
 
@@ -808,7 +812,7 @@ const FileEntry *Preprocessor::LookupFile(
   const FileEntry *FE = HeaderInfo.LookupFile(
       Filename, FilenameLoc, isAngled, FromDir, CurDir, Includers, SearchPath,
       RelativePath, RequestingModule, SuggestedModule, IsMapped, SkipCache,
-      BuildSystemModule);
+      BuildSystemModule, OpenFile, CacheFailures);
   if (FE) {
     if (SuggestedModule && !LangOpts.AsmPreprocessor)
       HeaderInfo.getModuleMap().diagnoseHeaderInclusion(
