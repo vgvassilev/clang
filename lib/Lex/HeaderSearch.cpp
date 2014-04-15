@@ -301,10 +301,12 @@ StringRef DirectoryLookup::getName() const {
 const FileEntry *HeaderSearch::getFileAndSuggestModule(
     StringRef FileName, SourceLocation IncludeLoc, const DirectoryEntry *Dir,
     bool IsSystemHeaderDir, Module *RequestingModule,
-    ModuleMap::KnownHeader *SuggestedModule) {
+    ModuleMap::KnownHeader *SuggestedModule,
+    bool OpenFile /*= true*/, bool CacheFailures /*= true*/) {
   // If we have a module map that might map this header, load it and
   // check whether we'll have a suggestion for a module.
-  const FileEntry *File = getFileMgr().getFile(FileName, /*OpenFile=*/true);
+  const FileEntry *File = getFileMgr().getFile(FileName, OpenFile,
+                                               CacheFailures);
   if (!File)
     return nullptr;
 
@@ -624,10 +626,10 @@ const FileEntry *HeaderSearch::LookupFile(
     ArrayRef<std::pair<const FileEntry *, const DirectoryEntry *>> Includers,
     SmallVectorImpl<char> *SearchPath, SmallVectorImpl<char> *RelativePath,
     Module *RequestingModule, ModuleMap::KnownHeader *SuggestedModule,
-    bool *IsMapped, bool SkipCache, bool BuildSystemModule) {
+    bool *IsMapped, bool SkipCache, bool BuildSystemModule,
+    bool OpenFile, bool CacheFailures) {
   if (IsMapped)
     *IsMapped = false;
-
   if (SuggestedModule)
     *SuggestedModule = ModuleMap::KnownHeader();
     
@@ -647,7 +649,8 @@ const FileEntry *HeaderSearch::LookupFile(
     // Otherwise, just return the file.
     return getFileAndSuggestModule(Filename, IncludeLoc, nullptr,
                                    /*IsSystemHeaderDir*/false,
-                                   RequestingModule, SuggestedModule);
+                                   RequestingModule, SuggestedModule,
+                                   OpenFile, CacheFailures);
   }
 
   // This is the header that MSVC's header search would have found.
@@ -683,7 +686,8 @@ const FileEntry *HeaderSearch::LookupFile(
           BuildSystemModule;
       if (const FileEntry *FE = getFileAndSuggestModule(
               TmpDir, IncludeLoc, IncluderAndDir.second, IncluderIsSystemHeader,
-              RequestingModule, SuggestedModule)) {
+              RequestingModule, SuggestedModule,
+              OpenFile, CacheFailures)) {
         if (!Includer) {
           assert(First && "only first includer can have no file");
           return FE;
