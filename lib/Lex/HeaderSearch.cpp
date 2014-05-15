@@ -331,7 +331,8 @@ const FileEntry *DirectoryLookup::LookupFile(
     ModuleMap::KnownHeader *SuggestedModule,
     bool &InUserSpecifiedSystemFramework,
     bool &HasBeenMapped,
-    SmallVectorImpl<char> &MappedName) const {
+    SmallVectorImpl<char> &MappedName,
+    bool OpenFile) const {
   InUserSpecifiedSystemFramework = false;
   HasBeenMapped = false;
 
@@ -352,7 +353,8 @@ const FileEntry *DirectoryLookup::LookupFile(
 
     return HS.getFileAndSuggestModule(TmpDir, IncludeLoc, getDir(),
                                       isSystemHeaderDirectory(),
-                                      RequestingModule, SuggestedModule);
+                                      RequestingModule, SuggestedModule,
+                                      OpenFile);
   }
 
   if (isFramework())
@@ -380,7 +382,7 @@ const FileEntry *DirectoryLookup::LookupFile(
     Result = HM->LookupFile(Filename, HS.getFileMgr());
 
   } else {
-    Result = HS.getFileMgr().getFile(Dest);
+    Result = HS.getFileMgr().getFile(Dest, OpenFile);
   }
 
   if (Result) {
@@ -782,7 +784,7 @@ const FileEntry *HeaderSearch::LookupFile(
     const FileEntry *FE = SearchDirs[i].LookupFile(
         Filename, *this, IncludeLoc, SearchPath, RelativePath, RequestingModule,
         SuggestedModule, InUserSpecifiedSystemFramework, HasBeenMapped,
-        MappedName);
+        MappedName, OpenFile);
     if (HasBeenMapped) {
       CacheLookup.MappedName =
           copyString(Filename, LookupFileCache.getAllocator());
