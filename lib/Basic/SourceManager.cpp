@@ -1451,7 +1451,15 @@ StringRef SourceManager::getBufferName(SourceLocation Loc,
                                        bool *Invalid) const {
   if (isInvalid(Loc, Invalid)) return "<invalid loc>";
 
-  return getBuffer(getFileID(Loc), Invalid)->getBufferIdentifier();
+  // Try to get the name without reading the buffer.
+  FileID FID = getFileID(Loc);
+  const SrcMgr::SLocEntry &Entry = getSLocEntry(FID, Invalid);
+  if (!Invalid && Entry.isFile()) {
+    if (const FileEntry* FE = Entry.getFile().getContentCache()->ContentsEntry)
+      return FE->getName();
+  }
+
+  return getBuffer(FID, Invalid)->getBufferIdentifier();
 }
 
 /// getPresumedLoc - This method returns the "presumed" location of a
