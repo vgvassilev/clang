@@ -653,6 +653,8 @@ private:
 
   using GlobalMacroMapType =
       ContinuousRangeMap<serialization::MacroID, ModuleFile *, 4>;
+  /// \brief Token literal data loaded and owned by us.
+  std::vector<std::string *> TokenLiteralDataLoaded;
 
   /// Mapping from global macro IDs to the module in which the
   /// macro resides along with the offset that should be added to the
