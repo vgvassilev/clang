@@ -21,6 +21,7 @@ namespace llvm {
   class LLVMContext;
   class Module;
   class StringRef;
+  class raw_ostream;
 }
 
 namespace clang {
@@ -84,6 +85,8 @@ public:
   ///   code generator will schedule the entity for emission if a
   ///   definition has been registered with this code generator.
   llvm::Constant *GetAddrOfGlobal(GlobalDecl decl, bool isForDefinition);
+
+  void print(llvm::raw_ostream& out);
 };
 
 /// CreateLLVMCodeGen - Create a CodeGenerator instance.
