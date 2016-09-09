@@ -1772,7 +1772,7 @@ public:
   friend class ASTRecordWriter;
   friend class ASTReader;
   friend class ASTWriter;
-  friend class DeclUnloader;
+  friend class ::cling::DeclUnloader;
 };
 
 /// \brief Represents a C++ deduction guide declaration.
