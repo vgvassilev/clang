@@ -10379,9 +10379,9 @@ bool Sema::CheckUsingDeclQualifier(SourceLocation UsingLoc,
     // we have a 'typename' keyword, the scope must resolve to a class type.
     if ((HasTypename && !NamedContext) ||
         (NamedContext && NamedContext->getRedeclContext()->isRecord())) {
-      auto *RD = NamedContext
-                     ? cast<CXXRecordDecl>(NamedContext->getRedeclContext())
-                     : nullptr;
+      DeclContext *RD = NamedContext
+                        ? cast<CXXRecordDecl>(NamedContext->getRedeclContext())
+                        : nullptr;
       if (RD && RequireCompleteDeclContext(const_cast<CXXScopeSpec&>(SS), RD))
         RD = nullptr;
 
