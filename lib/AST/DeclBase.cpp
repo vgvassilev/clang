@@ -1514,7 +1514,7 @@ void DeclContext::removeDecl(Decl *D) {
       StoredDeclsMap *Map = DC->getPrimaryContext()->LookupPtr;
       if (Map) {
         StoredDeclsMap::iterator Pos = Map->find(ND->getDeclName());
-        assert(Pos != Map->end() && "no lookup entry for decl");
+        assert((DC->hasExternalVisibleStorage() || Pos != Map->end()) && "no lookup entry for decl");
         Pos->second.remove(ND);
       }
     } while (DC->isTransparentContext() && (DC = DC->getParent()));
