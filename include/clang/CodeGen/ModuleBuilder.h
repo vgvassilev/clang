@@ -89,7 +89,7 @@ public:
 
   void print(llvm::raw_ostream& out);
   void forgetGlobal(llvm::GlobalValue* GV);
-  void forgetDecl(const GlobalDecl& GD);
+  void forgetDecl(const GlobalDecl& GD, llvm::StringRef MangledName);
   llvm::Module* StartModule(llvm::StringRef ModuleName,
                             llvm::LLVMContext& C,
                             const CodeGenOptions& CGO);
