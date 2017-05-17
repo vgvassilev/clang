@@ -101,7 +101,7 @@ const char *ContentCache::getInvalidBOM(StringRef BufStr) {
 }
 
 llvm::Optional<llvm::MemoryBufferRef>
-ContentCache::getBufferOrNone(DiagnosticsEngine &Diag, FileManager &FM,
+ContentCache::getBufferOrNone(DiagnosticsEngine &Diag, const SourceManager &SM,
                               SourceLocation Loc) const {
   // Lazily create the Buffer for ContentCaches that wrap files.  If we already
   // computed it, just return what we have.
@@ -115,6 +115,8 @@ ContentCache::getBufferOrNone(DiagnosticsEngine &Diag, FileManager &FM,
   // Start with the assumption that the buffer is invalid to simplify early
   // return paths.
   IsBufferInvalid = true;
+
+  FileManager &FM = SM.getFileManager();
 
   auto BufferOrError = FM.getBufferForFile(ContentsEntry, IsFileVolatile);
 
@@ -568,7 +570,7 @@ FileID SourceManager::createFileID(FileEntryRef SourceFile,
   // If this is a named pipe, immediately load the buffer to ensure subsequent
   // calls to ContentCache::getSize() are accurate.
   if (IR.ContentsEntry->isNamedPipe())
-    (void)IR.getBufferOrNone(Diag, getFileManager(), SourceLocation());
+    (void)IR.getBufferOrNone(Diag, *this, SourceLocation());
 
   return createFileIDImpl(IR, SourceFile.getName(), IncludePos, FileCharacter,
                           LoadedID, LoadedOffset);
@@ -702,7 +704,7 @@ SourceManager::createExpansionLocImpl(const ExpansionInfo &Info,
 llvm::Optional<llvm::MemoryBufferRef>
 SourceManager::getMemoryBufferForFileOrNone(const FileEntry *File) {
   SrcMgr::ContentCache &IR = getOrCreateContentCache(File->getLastRef());
-  return IR.getBufferOrNone(Diag, getFileManager(), SourceLocation());
+  return IR.getBufferOrNone(Diag, *this, SourceLocation());
 }
 
 void SourceManager::overrideFileContents(
@@ -768,7 +770,7 @@ SourceManager::getBufferDataIfLoaded(FileID FID) const {
 llvm::Optional<StringRef> SourceManager::getBufferDataOrNone(FileID FID) const {
   if (const SrcMgr::SLocEntry *Entry = getSLocEntryForFile(FID))
     if (auto B = Entry->getFile().getContentCache().getBufferOrNone(
-            Diag, getFileManager(), SourceLocation()))
+            Diag, *this, SourceLocation()))
       return B->getBuffer();
   return None;
 }
@@ -1189,7 +1191,7 @@ const char *SourceManager::getCharacterData(SourceLocation SL,
     return "<<<<INVALID BUFFER>>>>";
   }
   llvm::Optional<llvm::MemoryBufferRef> Buffer =
-      Entry.getFile().getContentCache().getBufferOrNone(Diag, getFileManager(),
+      Entry.getFile().getContentCache().getBufferOrNone(Diag, *this,
                                                         SourceLocation());
   if (Invalid)
     *Invalid = !Buffer;
@@ -1390,7 +1392,7 @@ unsigned SourceManager::getLineNumber(FileID FID, unsigned FilePos,
   /// SourceLineCache for it on demand.
   if (!Content->SourceLineCache) {
     llvm::Optional<llvm::MemoryBufferRef> Buffer =
-        Content->getBufferOrNone(Diag, getFileManager(), SourceLocation());
+        Content->getBufferOrNone(Diag, *this, SourceLocation());
     if (Invalid)
       *Invalid = !Buffer;
     if (!Buffer)
@@ -1556,7 +1558,7 @@ PresumedLoc SourceManager::getPresumedLoc(SourceLocation Loc,
   StringRef Filename;
   if (C->OrigEntry)
     Filename = C->OrigEntry->getName();
-  else if (auto Buffer = C->getBufferOrNone(Diag, getFileManager()))
+  else if (auto Buffer = C->getBufferOrNone(Diag, *this))
     Filename = Buffer->getBufferIdentifier();
 
   unsigned LineNo = getLineNumber(LocInfo.first, LocInfo.second, &Invalid);
@@ -1740,7 +1742,7 @@ SourceLocation SourceManager::translateLineCol(FileID FID,
   // If this is the first use of line information for this buffer, compute the
   // SourceLineCache for it on demand.
   llvm::Optional<llvm::MemoryBufferRef> Buffer =
-      Content->getBufferOrNone(Diag, getFileManager());
+      Content->getBufferOrNone(Diag, *this);
   if (!Buffer)
     return SourceLocation();
   if (!Content->SourceLineCache)
