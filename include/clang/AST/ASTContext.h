@@ -228,7 +228,11 @@ private:
                                      ASTContext&>
     SubstTemplateTemplateParmPacks;
 
-  /// The set of nested name specifiers.
+  /// Generation number for this external AST source. Must be increased
+  /// whenever we might have added new redeclarations for existing decls.
+  uint32_t CurrentGeneration = 0;
+
+  /// \brief The set of nested name specifiers.
   ///
   /// This set is managed by the NestedNameSpecifier class.
   mutable llvm::FoldingSet<NestedNameSpecifier> NestedNameSpecifiers;
@@ -653,6 +657,15 @@ public:
   }
 
   DynTypedNodeList getParents(const ast_type_traits::DynTypedNode &Node);
+
+  uint32_t getGeneration() const { return CurrentGeneration; }
+  uint32_t incrementGeneration() {
+    uint32_t OldGeneration = CurrentGeneration;
+    CurrentGeneration++;
+    assert(CurrentGeneration > OldGeneration &&
+           "Overflowed generation counter");
+    return OldGeneration;
+  }
 
   const clang::PrintingPolicy &getPrintingPolicy() const {
     return PrintingPolicy;
@@ -3133,7 +3146,7 @@ typename clang::LazyGenerationalUpdatePtr<Owner, T, Update>::ValueType
   // include ASTContext.h. We explicitly instantiate it for all relevant types
   // in ASTContext.cpp.
   if (auto *Source = Ctx.getExternalSource())
-    return new (Ctx) LazyData(Source, Value);
+    return new (Ctx) LazyData(&Ctx, Source, Value);
   return Value;
 }
 
