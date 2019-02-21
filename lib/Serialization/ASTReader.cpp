@@ -2753,7 +2753,7 @@ ASTReader::ReadControlBlock(ModuleFile &F,
                                       /*AllowExtraModuleMapSearch*/ true);
           if (M) {
             std::string Path = HS.getPrebuiltModuleFileName(M->Name);
-                           if (Path.empty())
+            if (Path.empty())
               Path = HS.getCachedModuleFileName(M->Name,
                    HS.getModuleMap().getModuleMapFileForUniquing(M)->getName());
             // FIXME: Add a hash comparison to check if ImportedFile's hash and the
