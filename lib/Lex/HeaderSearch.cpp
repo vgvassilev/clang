@@ -140,13 +140,23 @@ std::string HeaderSearch::getPrebuiltModuleFileName(StringRef ModuleName,
   if (FileMapOnly || HSOpts->PrebuiltModulePaths.empty())
     return {};
 
+
+  std::string ModuleCachePath = getModuleCachePath();
+  bool CacheFailure = true;
+
   // Then go through each prebuilt module directory and try to find the pcm
   // file.
   for (const std::string &Dir : HSOpts->PrebuiltModulePaths) {
     SmallString<256> Result(Dir);
     llvm::sys::fs::make_absolute(Result);
     llvm::sys::path::append(Result, ModuleName + ".pcm");
-    if (getFileMgr().getFile(Result.str()))
+    // If we have the same ModuleCachePath and PrebuiltModulePath pointing
+    // to the same folder we should not cache the file lookup failure as it
+    // may be currently building an implicit module.
+    if (!ModuleCachePath.empty() && ModuleCachePath == Dir)
+      CacheFailure = false;
+
+    if (getFileMgr().getFile(Result.str(), /*Open=*/false, CacheFailure))
       return Result.str().str();
   }
   return {};
