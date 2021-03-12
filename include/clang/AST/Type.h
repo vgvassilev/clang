@@ -4682,7 +4682,6 @@ class SubstTemplateTypeParmType : public Type, public llvm::FoldingSetNode {
              Canon->isVariablyModifiedType(),
              Canon->containsUnexpandedParameterPack()),
         Replaced(Param), Replacement(ReplacementType) {}
-  friend class ASTContext;
 
 public:
   /// Gets the template parameter that was substituted for.
