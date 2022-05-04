@@ -51,6 +51,26 @@ protected:
   IntrusiveRefCntPtr<TargetInfo> Target;
 };
 
+//Test for invalidate cache success, making the file entry invalid, until reread
+TEST_F(SourceManagerTest, invalidateCacheSuccess) {
+  const char *Source = "int x;";
+
+  std::unique_ptr<llvm::MemoryBuffer> Buf =
+    llvm::MemoryBuffer::getMemBuffer(source);
+  const FileEntry *SourceFile =
+    FileMgr.getVirtualFile("mainFile.cpp", Buf->getBufferSize(), 0);
+
+  FileID mainFileID = SourceMgr.createFileID(std::move(Buf));
+  SourceMgr.overrideFileContents(SourceFile, std::move(Buf));
+  SourceMgr.setMainFileID(mainFileID);
+  SourceMgr::invalidateCache(mainFileID);
+
+  EXPECT_FALSE(SrcMgr::ContentCache);
+  // TODO: Getter or not? Recently added.
+  EXPECT_TRUE(SourceFile->FileEntriesToReread);
+  EXPECT_FALSE(SourceFile->isValid());
+}
+
 TEST_F(SourceManagerTest, isBeforeInTranslationUnit) {
   const char *source =
     "#define M(x) [x]\n"
