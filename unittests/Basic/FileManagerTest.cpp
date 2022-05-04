@@ -98,6 +98,23 @@ class FileManagerTest : public ::testing::Test {
   FileManager manager;
 };
 
+// If file entry valid, mark the file entry invalid, until reread.
+TEST_F(FileManagerTest, invalidateCacheSuccess) {
+  manager.setStatCache(std::make_unique<FakeStatCache>());
+
+  manager.getVirtualFile("file.cpp", 100, 0);
+  auto file = manager.getFile("file.cpp");
+
+  // Check for file null assertion success
+  manager.InvalidateCache(NULL);
+
+  manager.InvalidateCache(*file);
+  // TODO: FileEntriesToRead is private member variable of class FileManager
+  ASSERT_TRUE(manager.FileEntriesToReread);
+
+  ASSERT_FALSE((*file)->isValid());
+}
+
 // When a virtual file is added, its getDir() field is set correctly
 // (not NULL, correct name).
 TEST_F(FileManagerTest, getVirtualFileSetsTheDirFieldCorrectly) {
