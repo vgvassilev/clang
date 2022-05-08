@@ -158,6 +158,22 @@ void DiagnosticsEngine::Reset(bool soft /*=false*/) {
   }
 }
 
+unsigned DiagnosticsEngine::getDelayedDiagID() {
+  return DelayedDiagID;
+}
+
+bool DiagnosticsEngine::getDiagStatesEmpty() {
+  return DiagStates.empty();
+}
+
+bool DiagnosticsEngine::getDiagStatesByLocEmpty() {
+  return DiagStatesByLoc.empty();
+}
+
+bool DiagnosticsEngine::getDiagStateOnPushStackEmpty() {
+  return DiagStateOnPushStack.empty();
+}
+
 void DiagnosticsEngine::SetDelayedDiagnostic(unsigned DiagID, StringRef Arg1,
                                              StringRef Arg2, StringRef Arg3) {
   if (DelayedDiagID)
