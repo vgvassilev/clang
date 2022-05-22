@@ -26,6 +26,7 @@
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/iterator_range.h"
 #include "llvm/Support/Compiler.h"
+#include "gtest/gtest.h"
 #include <cassert>
 #include <cstdint>
 #include <limits>
@@ -190,6 +191,7 @@ struct DiagnosticStorage {
 /// SourceManager.
 class DiagnosticsEngine : public RefCountedBase<DiagnosticsEngine> {
 public:
+  FRIEND_TEST(DiagnosticTest, softReset);
   /// The level of the diagnostic, after it has been through mapping.
   enum Level {
     Ignored = DiagnosticIDs::Ignored,
