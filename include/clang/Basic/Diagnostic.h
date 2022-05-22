@@ -891,18 +891,6 @@ public:
   /// \param[in] soft - if true, doesn't reset the diagnostic mappings and state
   void Reset(bool soft = false);
 
-  /// Get ID of the "delayed" diagnostic, i.e., DelayedDiagID
-  unsigned getDelayedDiagID();
-
-  // Check if DiagStates is empty
-  bool getDiagStatesEmpty();
-
-   // Check if DiagStateByLoc is empty
-  bool getDiagStatesByLocEmpty();
-
-  // Check if DiagStateOnPushStack is empty
-  bool getDiagStateOnPushStack();
-
   //===--------------------------------------------------------------------===//
   // DiagnosticsEngine classification and reporting interfaces.
   //
