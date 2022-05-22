@@ -6,7 +6,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+#define private public
 #include "clang/Basic/Diagnostic.h"
+#undef private
 #include "clang/Basic/DiagnosticError.h"
 #include "clang/Basic/DiagnosticIDs.h"
 #include "gtest/gtest.h"
@@ -14,36 +16,6 @@
 using namespace llvm;
 using namespace clang;
 
-namespace clang {
-  // Check that soft RESET works as intended
-  TEST(DiagnosticTest, softReset) {
-    DiagnosticsEngine Diags(new DiagnosticIDs(),
-                          new DiagnosticOptions,
-                          new IgnoringDiagConsumer());
-
-    unsigned numWarnings = 0U, numErrors = 0U, delayedDiagID = 0U;
-
-    Diags.Reset(true);
-    // Check For ErrorOccurred and TrapNumErrorsOccurred
-    EXPECT_FALSE(Diags.hasErrorOccurred());
-    EXPECT_FALSE(Diags.hasFatalErrorOccurred());
-    EXPECT_FALSE(Diags.hasUncompilableErrorOccurred());
-    // Check for UnrecoverableErrorOccurred and TrapNumUnrecoverableErrorsOccurred
-    EXPECT_FALSE(Diags.hasUnrecoverableErrorOccurred());
-
-    EXPECT_EQ(Diags.getNumWarnings(), numWarnings);
-    EXPECT_EQ(Diags.getNumErrors(), numErrors);
-    EXPECT_EQ(Diags.DelayedDiagID, delayedDiagID);
-
-    EXPECT_FALSE(Diags.isDiagnosticInFlight());
-    EXPECT_TRUE(Diags.isLastDiagnosticIgnored());
-
-    EXPECT_FALSE(Diags.getDiagStatesEmpty());
-    EXPECT_FALSE(Diags.getDiagStatesByLocEmpty());
-    EXPECT_FALSE(Diags.getDiagStateOnPushStack());
-}
-
-}
 namespace {
 
 // Check that DiagnosticErrorTrap works with SuppressAllDiagnostics.
@@ -100,6 +72,34 @@ TEST(DiagnosticTest, fatalsAsError) {
     // after fatal errors.
     EXPECT_EQ(Diags.getNumWarnings(), FatalsAsError);
   }
+}
+
+// Check that soft RESET works as intended
+TEST(DiagnosticTest, softReset) {
+  DiagnosticsEngine Diags(new DiagnosticIDs(),
+                          new DiagnosticOptions,
+                          new IgnoringDiagConsumer());
+
+  unsigned numWarnings = 0U, numErrors = 0U, delayedDiagID = 0U;
+
+  Diags.Reset(true);
+  // Check For ErrorOccurred and TrapNumErrorsOccurred
+  EXPECT_FALSE(Diags.hasErrorOccurred());
+  EXPECT_FALSE(Diags.hasFatalErrorOccurred());
+  EXPECT_FALSE(Diags.hasUncompilableErrorOccurred());
+  // Check for UnrecoverableErrorOccurred and TrapNumUnrecoverableErrorsOccurred
+  EXPECT_FALSE(Diags.hasUnrecoverableErrorOccurred());
+
+  EXPECT_EQ(Diags.getNumWarnings(), numWarnings);
+  EXPECT_EQ(Diags.getNumErrors(), numErrors);
+  EXPECT_EQ(Diags.DelayedDiagID, delayedDiagID);
+
+  EXPECT_FALSE(Diags.isDiagnosticInFlight());
+  EXPECT_TRUE(Diags.isLastDiagnosticIgnored());
+
+  EXPECT_FALSE(Diags.DiagStates.empty());
+  EXPECT_FALSE(Diags.DiagStatesByLoc.empty());
+  EXPECT_FALSE(Diags.DiagStateOnPushStack.empty());
 }
 
 TEST(DiagnosticTest, diagnosticError) {
