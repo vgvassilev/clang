@@ -86,14 +86,17 @@ int main(int argc, const char **argv) {
       llvm::logAllUnhandledErrors(std::move(Err), llvm::errs(), "error: ");
   }
 
+  bool hadErrors = false;
   if (OptInputs.empty()) {
     llvm::LineEditor LE("clang-repl");
     // FIXME: Add LE.setListCompleter
     while (llvm::Optional<std::string> Line = LE.readLine()) {
       if (*Line == "quit")
         break;
-      if (auto Err = Interp->ParseAndExecute(*Line))
+      if (auto Err = Interp->ParseAndExecute(*Line)) {
         llvm::logAllUnhandledErrors(std::move(Err), llvm::errs(), "error: ");
+        hadErrors = true;
+      }
     }
   }
 
@@ -104,5 +107,5 @@ int main(int argc, const char **argv) {
 
   llvm::llvm_shutdown();
 
-  return 0;
+  return hadErrors;
 }
