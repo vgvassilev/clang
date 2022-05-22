@@ -9,7 +9,9 @@
 #include "clang/Basic/SourceManager.h"
 #include "clang/Basic/Diagnostic.h"
 #include "clang/Basic/DiagnosticOptions.h"
+#define private public
 #include "clang/Basic/FileManager.h"
+#undef private
 #include "clang/Basic/LangOptions.h"
 #include "clang/Basic/TargetInfo.h"
 #include "clang/Basic/TargetOptions.h"
@@ -66,7 +68,6 @@ TEST_F(SourceManagerTest, invalidateCacheSuccess) {
   SourceMgr::invalidateCache(mainFileID);
 
   EXPECT_FALSE(SrcMgr::ContentCache);
-  // TODO: Getter or not? Recently added.
   EXPECT_TRUE(SourceFile->FileEntriesToReread);
   EXPECT_FALSE(SourceFile->isValid());
 }

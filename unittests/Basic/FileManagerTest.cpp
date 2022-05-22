@@ -6,7 +6,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+#define private public
 #include "clang/Basic/FileManager.h"
+#undef private
 #include "clang/Basic/FileSystemOptions.h"
 #include "clang/Basic/FileSystemStatCache.h"
 #include "llvm/ADT/STLExtras.h"
@@ -109,7 +111,6 @@ TEST_F(FileManagerTest, invalidateCacheSuccess) {
   manager.InvalidateCache(NULL);
 
   manager.InvalidateCache(*file);
-  // TODO: FileEntriesToRead is private member variable of class FileManager
   ASSERT_TRUE(manager.FileEntriesToReread);
 
   ASSERT_FALSE((*file)->isValid());
